@@ -26,7 +26,8 @@ services:
     depends_on:
       - iam-db
     volumes:
-      - ./src:/app/src
+      - .:/app                   
+      - /app/node_modules         
     networks:
       - default
 
