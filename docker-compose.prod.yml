@@ -1,0 +1,10 @@
+version: '3.5'
+
+services:
+  iam-app:
+    build:
+      context: .
+      dockerfile: Dockerfile 
+    restart: always
+    environment:
+      - NODE_ENV=production

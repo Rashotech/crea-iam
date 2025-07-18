@@ -1,0 +1,35 @@
+version: '3.5'
+
+services:
+  iam-db:
+    image: postgres
+    restart: always
+    env_file:
+      - .env
+    container_name: iam-postgres
+    volumes:
+      - ./pgdata:/var/lib/postgresql/data
+    ports:
+      - '5432:5432'
+    networks:
+      - default
+
+  iam-app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: iam-app
+    environment: 
+      - PORT=${PORT} 
+    ports:
+      - '3000:3000'
+    depends_on:
+      - iam-db
+    volumes:
+      - ./src:/app/src
+    networks:
+      - default
+
+
+networks:
+  default:
