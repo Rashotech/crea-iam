@@ -1,5 +1,5 @@
 import { Column, Entity } from "typeorm";
-import { UserRole, UserStatus } from "../enums";
+import { Gender, UserRole, UserStatus } from "../enums";
 import { Exclude } from 'class-transformer';
 import { BaseEntity } from "src/common/entities/base.entity";
 
@@ -14,6 +14,27 @@ export class User extends BaseEntity {
   @Column()
   @Exclude()
   passwordHash: string;
+
+  @Column()
+  firstName: string;
+
+  @Column()
+  lastName: string;
+
+  @Column({ type: 'date' })
+  dob: Date;
+
+  @Column({
+    type: 'enum',
+    enum: Gender,
+  })
+  gender: Gender;
+
+  @Column()
+  healthId: string;
+
+  @Column({ default: true })
+  active: boolean;
 
   @Column({
     type: "enum",
