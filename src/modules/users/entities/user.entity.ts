@@ -46,4 +46,10 @@ export class User extends BaseEntity {
 
   @Column({ type: 'enum', enum: UserStatus, default: UserStatus.ACTIVE })
   status: UserStatus;
+
+  @Column({ type: Date, nullable: true })
+  lastLoginAt: Date;
+
+  @Column({ nullable: true })
+  refreshToken: string;
 }

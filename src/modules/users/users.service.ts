@@ -2,9 +2,10 @@ import { Injectable, Logger } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import * as bcrypt from 'bcrypt';
 import { User } from "./entities";
-import { Repository } from "typeorm";
+import { EntityManager, Or, Repository } from "typeorm";
 import { RegisterUserDto } from "src/modules/auth/dto";
 import { generatePatientMRN } from "src/common/helpers/utils";
+import { UserStatus } from "./enums";
 
 @Injectable()
 export class UsersService {
@@ -13,6 +14,7 @@ export class UsersService {
   constructor(
     @InjectRepository(User)
     private usersRepository: Repository<User>,
+    private entityManager: EntityManager,
   ) {}
 
   async createUser(registerUserDto: RegisterUserDto) {
@@ -48,6 +50,18 @@ export class UsersService {
     return existingUser;
   }
 
+  async validateUser(userId: string) {
+    const activeFilter = { active: true, status: UserStatus.ACTIVE };
+    const user = await this.usersRepository.findOne({
+      where: [
+        { username: userId, ...activeFilter },
+        { email: userId, ...activeFilter }
+      ],
+    });
+  
+    return user;
+  }
+
   private async generateUniqueHealthId() {
     let healthId: string = "";
     let mrnIsUnique = false;
@@ -66,6 +80,14 @@ export class UsersService {
     }
 
     return healthId;
+  }
+
+  async updateUser(
+    id: string,
+    updateUserDto: Partial<User>,
+  ) {
+    this.logger.log(`Updating user with ID: ${id}`, updateUserDto);
+    await this.entityManager.update(User, id, updateUserDto);
   }
 }
 

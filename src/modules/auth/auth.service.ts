@@ -1,11 +1,15 @@
 import {
+  BadRequestException,
   ConflictException,
   Injectable,
   Logger,
 } from '@nestjs/common';
+import { JwtService } from '@nestjs/jwt';
+import * as bcrypt from 'bcrypt';
 import { ExceptionHelper } from 'src/common/helpers/error-handler';
 import { UsersService } from '../users/users.service';
-import { RegisterUserDto } from './dto';
+import { LoginUserDto, RegisterUserDto } from './dto';
+import { ConfigService } from '@nestjs/config';
 
 @Injectable()
 export class AuthService {
@@ -13,6 +17,8 @@ export class AuthService {
 
   constructor(
     private usersService: UsersService,
+    private jwtService: JwtService,
+    private configService: ConfigService,
   ) {}
   
   async register(registerUserDto: RegisterUserDto) {
@@ -25,11 +31,80 @@ export class AuthService {
       }
 
       const newUser = await this.usersService.createUser(registerUserDto);
-      const { passwordHash, ...userWithoutPassword } = newUser;
+      const { passwordHash, refreshToken, lastLoginAt, ...userWithoutPassword } = newUser;
       return userWithoutPassword;
     } catch (error) {
       this.logger.error(error);
       ExceptionHelper.handleException(error);
     }
+  }
+
+  async login(loginUserDto: LoginUserDto) {
+    try {
+       // Check if user exists
+      const existingUser = await this.usersService.validateUser(loginUserDto.userId);
+      
+      if (!existingUser) {
+        throw new BadRequestException('Invalid username or password');
+      }
+
+      const isPasswordValid = await bcrypt.compare(loginUserDto.password, existingUser.passwordHash);
+      if (!isPasswordValid) {
+        throw new BadRequestException('Invalid username or password');
+      }
+
+      const { passwordHash, refreshToken, lastLoginAt, ...userWithoutPassword } = existingUser;
+
+      const tokens = await this.getTokens(existingUser.id.toString(), existingUser.email);
+      await this.updateRefreshToken(existingUser.id.toString(), tokens.refreshToken);
+
+      return { user: userWithoutPassword, tokens };
+     
+    } catch (error) {
+      this.logger.error(error);
+      ExceptionHelper.handleException(error);
+    }
+  }
+
+  async getTokens(userId: string, email: string) {
+    const [accessToken, refreshToken] = await Promise.all([
+      this.jwtService.signAsync(
+        {
+          sub: userId,
+          email,
+        },
+        {
+          secret: this.configService.get<string>('jwtSettings.accessSecret'),
+          expiresIn: `${this.configService.get<number>('jwtSettings.accessExpirationMinutes')}m`,
+        },
+      ),
+      this.jwtService.signAsync(
+        {
+          sub: userId,
+          email,
+        },
+        {
+          secret: this.configService.get<string>('jwtSettings.refreshSecret'),
+          expiresIn: `${this.configService.get<number>('jwtSettings.refreshExpirationDays')}d`,
+        },
+      ),
+    ]);
+
+    return {
+      accessToken,
+      refreshToken,
+    };
+  }
+
+   async updateRefreshToken(userId: string, refreshToken: string) {
+    const hashedRefreshToken = await this.hashData(refreshToken);
+    return await this.usersService.updateUser(userId, {
+      refreshToken: hashedRefreshToken,
+      lastLoginAt: new Date()
+    });
+  }
+
+  private hashData(data: string) {
+    return bcrypt.hash(data, 10);
   }
 }

@@ -1,7 +1,7 @@
 import { Body, Controller, HttpCode, Post } from "@nestjs/common";
 import { AuthService } from "./auth.service";
 import { SuccessResponse } from "src/common/helpers/SuccessResponse";
-import { RegisterUserDto } from "./dto";
+import { LoginUserDto, RegisterUserDto } from "./dto";
 
 @Controller('auth')
 export class AuthController {
@@ -15,5 +15,12 @@ export class AuthController {
       'Registration Successful',
       response,
     );
+  }
+
+  @HttpCode(200)
+  @Post('login')
+  async login(@Body() data: LoginUserDto) {
+    const response = await this.authService.login(data);
+    return new SuccessResponse('Login Successful', response);
   }
 }
