@@ -8,6 +8,7 @@ import { dataSourceOptions } from './config/data-source-options';
 import { AuthModule } from './modules/auth/auth.module';
 import { UsersModule } from './modules/users/users.module';
 import { APP_PIPE } from '@nestjs/core';
+import { AppointmentsModule } from './modules/appointments/appointments.module';
 
 @Module({
   imports: [
@@ -17,7 +18,8 @@ import { APP_PIPE } from '@nestjs/core';
     }),
     TypeOrmModule.forRoot(dataSourceOptions),
     AuthModule,
-    UsersModule
+    UsersModule,
+    AppointmentsModule
   ],
   controllers: [AppController],
   providers: [
