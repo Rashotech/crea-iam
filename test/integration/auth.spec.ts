@@ -101,11 +101,6 @@ describe('Authentication (Integration)', () => {
   afterAll(async () => {
     await app.close();
     await postgresContainer.stop();
-    
-    // Clean up environment variables
-    delete process.env.ADMIN_USERNAME;
-    delete process.env.ADMIN_EMAIL;
-    delete process.env.ADMIN_PASSWORD;
   });
 
   describe('Registration', () => {
@@ -136,7 +131,7 @@ describe('Authentication (Integration)', () => {
       const invalidUser = {
         username: 'test',
         email: 'invalid-email',
-        password: '123', // Too short
+        password: '123',
       };
 
       const response = await request(app.getHttpServer())
@@ -271,7 +266,6 @@ describe('Authentication (Integration)', () => {
       expect(response.body.data).toHaveProperty('accessToken');
       expect(response.body.data).toHaveProperty('refreshToken');
       
-      // Update tokens for future tests
       accessToken = response.body.data.accessToken;
       refreshToken = response.body.data.refreshToken;
     });
@@ -295,7 +289,6 @@ describe('Authentication (Integration)', () => {
     });
 
     it('should not allow using refresh token after logout', async () => {
-      // Try to refresh token after logout
       const response = await request(app.getHttpServer())
         .get('/api/v1/auth/refresh')
         .set('Authorization', `Bearer ${refreshToken}`)

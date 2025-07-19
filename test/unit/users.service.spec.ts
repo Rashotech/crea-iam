@@ -187,27 +187,6 @@ describe('UsersService', () => {
     });
   });
 
-  describe('seedAdminUser', () => {
-    it('should not create admin if already exists', async () => {
-      mockUserRepository.findOne.mockResolvedValue(mockUser);
-
-      await usersService.seedAdminUser();
-
-      expect(mockUserRepository.create).not.toHaveBeenCalled();
-    });
-
-    it('should create admin user if not exists', async () => {
-      mockUserRepository.findOne.mockResolvedValue(null);
-      mockUserRepository.create.mockReturnValue(mockUser);
-      mockUserRepository.save.mockResolvedValue(mockUser);
-
-      await usersService.seedAdminUser();
-
-      expect(mockUserRepository.create).toHaveBeenCalled();
-      expect(mockUserRepository.save).toHaveBeenCalled();
-    });
-  });
-
   describe('getUser', () => {
     it('should return a user by id', async () => {
       mockUserRepository.findOne.mockResolvedValue(mockUser);

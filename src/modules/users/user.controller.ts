@@ -13,6 +13,7 @@ export class UsersController {
 
   @HttpCode(201)
   @Post()
+  @UseGuards(AccessTokenGuard)
   @Roles(UserRole.ADMIN, UserRole.DOCTOR, UserRole.NURSE)
   async createUser(@Body() registerUserDto: RegisterUserDto) {
     const response = await this.usersService.createNewUser(registerUserDto);
