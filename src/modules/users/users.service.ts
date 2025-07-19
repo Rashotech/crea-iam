@@ -55,10 +55,20 @@ export class UsersService {
     const user = await this.usersRepository.findOne({
       where: [
         { username: userId, ...activeFilter },
-        { email: userId, ...activeFilter }
+        { email: userId, ...activeFilter },
       ],
     });
-  
+   
+    return user;
+  }
+
+  async findUserById(userId: string) {
+    const user = await this.usersRepository.findOne({
+      where: [
+        { id: userId },
+      ],
+    });
+   
     return user;
   }
 

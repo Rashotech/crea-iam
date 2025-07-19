@@ -48,8 +48,8 @@ export class User extends BaseEntity {
   status: UserStatus;
 
   @Column({ type: Date, nullable: true })
-  lastLoginAt: Date;
+  lastLoginAt?: Date;
 
   @Column({ nullable: true })
-  refreshToken: string;
+  refreshToken?: string;
 }
