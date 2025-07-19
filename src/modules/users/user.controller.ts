@@ -1,9 +1,8 @@
-import { Body, Controller, Get, HttpCode, Param, Patch, Post, Query, UseGuards } from "@nestjs/common";
+import { Body, Controller, Delete, Get, HttpCode, Param, Patch, Post, Query, UseGuards } from "@nestjs/common";
 import { UsersService } from "./users.service";
 import { AccessTokenGuard } from "src/common/guards";
-import { CurrentUser, Roles } from "src/common/decorators";
+import { Roles } from "src/common/decorators";
 import { UserRole } from "./enums";
-import { ICurrentUser } from "../auth/interfaces";
 import { SuccessResponse } from "src/common/helpers/SuccessResponse";
 import { EditUserDto, GetUsersDto } from "./dto";
 import { RegisterUserDto } from "../auth/dto";
@@ -33,6 +32,14 @@ export class UsersController {
 
   @UseGuards(AccessTokenGuard)
   @Roles(UserRole.ADMIN)
+  @Get(":id")
+  async getUser(@Param("id") id: string) {
+    const user = await this.usersService.getUser(id);
+    return new SuccessResponse('User Fetched Successfully', user);
+  }
+
+  @UseGuards(AccessTokenGuard)
+  @Roles(UserRole.ADMIN)
   @Patch(":id")
   async updateUserDetails(
     @Param("id") id: string,
@@ -40,5 +47,13 @@ export class UsersController {
   ) {
     const user = await this.usersService.updateUserDetails(id, editUserDto);
     return new SuccessResponse('User Updated Successfully', user);
+  }
+
+  @UseGuards(AccessTokenGuard)
+  @Roles(UserRole.ADMIN)
+  @Delete(":id")
+  async deleteUserDetails(@Param("id") id: string) {
+    const user = await this.usersService.deleteUser(id);
+    return new SuccessResponse('User Deleted Successfully', user);
   }
 }

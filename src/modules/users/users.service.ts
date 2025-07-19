@@ -186,6 +186,21 @@ export class UsersService {
     }
   }
 
+  async getUser(id: string) {
+    try {    
+      const user = await this.usersRepository.findOne({ where: { id } });
+      if (!user) {
+        throw new NotFoundException('User not found');
+      }
+
+      this.logger.log(`Fetching user details for ID: ${id}`);
+      return excludeSensitiveUserData(user);
+    } catch (error) {
+      this.logger.error(`Failed to fetch user details for ID: ${id}`, error);
+      ExceptionHelper.handleException(error);
+    }
+  }
+
   async updateUserDetails(id: string, editUserDto: EditUserDto) {
     try {
       this.logger.log(`Updating user details for ID: ${id}`, editUserDto);
@@ -200,6 +215,22 @@ export class UsersService {
       return excludeSensitiveUserData(validatedData);
     } catch (error) {
       this.logger.error(`Failed to update user details for ID: ${id}`, error);
+      ExceptionHelper.handleException(error);
+    }
+  }
+
+  async deleteUser(id: string) {
+    try {    
+      const user = await this.usersRepository.findOne({ where: { id } });
+      if (!user) {
+        throw new NotFoundException('User not found');
+      }
+
+      this.logger.log(`Deleting user details for ID: ${id}`);
+
+      await this.usersRepository.delete(id);
+    } catch (error) {
+      this.logger.error(`Failed to delete user details for ID: ${id}`, error);
       ExceptionHelper.handleException(error);
     }
   }
