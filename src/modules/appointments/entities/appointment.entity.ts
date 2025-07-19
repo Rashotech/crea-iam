@@ -5,8 +5,11 @@ import { AppointmentStatus, AppointmentType } from "../enums";
 
 @Entity('appointments')
 export class Appointment extends BaseEntity {
-  @Column({ type: 'timestamp' })
-  scheduledDate: Date;
+  @Column({ type: 'date' })
+  appointmentDate: Date;
+
+  @Column({ type: 'time' })
+  appointmentTime: string;
 
   @Column({ type: 'int', default: 30 })
   duration: number;
@@ -40,7 +43,7 @@ export class Appointment extends BaseEntity {
   @Column('uuid')
   userId: string;
 
-  @ManyToOne(() => User, { eager: true })
+  @ManyToOne(() => User, { eager: false })
   @JoinColumn({ name: 'userId' })
   user: User;
 }
