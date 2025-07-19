@@ -7,11 +7,11 @@ import {
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
-import { ExceptionHelper } from 'src/common/helpers/error-handler';
+import { ExceptionHelper } from '../../common/helpers/error-handler';
 import { UsersService } from '../users/users.service';
 import { LoginUserDto, RegisterUserDto } from './dto';
 import { ConfigService } from '@nestjs/config';
-import { excludeSensitiveUserData } from 'src/common/helpers/utils';
+import { excludeSensitiveUserData } from '../../common/helpers/utils';
 
 @Injectable()
 export class AuthService {
