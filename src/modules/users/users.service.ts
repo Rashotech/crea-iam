@@ -2,10 +2,11 @@ import { Injectable, Logger } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import * as bcrypt from 'bcrypt';
 import { User } from "./entities";
-import { EntityManager, Or, Repository } from "typeorm";
+import { ArrayContains, EntityManager, FindOptionsWhere, Repository } from "typeorm";
 import { RegisterUserDto } from "src/modules/auth/dto";
-import { generatePatientMRN } from "src/common/helpers/utils";
-import { UserStatus } from "./enums";
+import { createPaginatedResponse, generatePatientMRN, getDataPaginationData } from "src/common/helpers/utils";
+import { UserRole, UserStatus } from "./enums";
+import { GetUsersDto } from "./dto";
 
 @Injectable()
 export class UsersService {
@@ -98,6 +99,72 @@ export class UsersService {
   ) {
     this.logger.log(`Updating user with ID: ${id}`, updateUserDto);
     await this.entityManager.update(User, id, updateUserDto);
+  }
+
+  async getAllUsers(query: GetUsersDto) {
+    const { gender, role } = query;
+    const paginationOptions = getDataPaginationData(query);
+
+    let filter: FindOptionsWhere<User> = {};
+
+    if (gender) {
+      filter = { ...filter, gender };
+    }
+
+    if (role) {
+      filter = { ...filter, roles: ArrayContains([role]) };
+    }
+
+    const selectFields: (keyof User)[] = [
+      'id', 'createdAt', 'updatedAt', 'username', 'email', 'firstName', 'lastName',
+      'dob', 'gender', 'healthId', 'active', 'roles', 'status'
+    ];
+
+    const [users, totalItems] = await this.usersRepository.findAndCount({
+      where: filter,
+      ...paginationOptions,
+      select: selectFields
+    });
+
+    return createPaginatedResponse(users, totalItems, paginationOptions);
+  }
+
+  async seedAdminUser() {
+     try {
+        const adminUsername = process.env.ADMIN_USERNAME || 'superadmin';
+        const adminEmail = process.env.ADMIN_EMAIL || 'superadmin@example.com';
+        const adminPassword = process.env.ADMIN_PASSWORD || 'Password123';
+
+        console.log(`Checking for existing admin user with email: ${adminEmail}...`);
+        const existingAdmin = await this.usersRepository.findOne({
+            where: [{ email: adminEmail }],
+        });
+
+        if (existingAdmin) {
+            console.log('Admin user already exists. Skipping seeding.');
+            return;
+        }
+
+        console.log(`Seeding new admin user: ${adminUsername}...`);
+        const saltRounds = 10;
+        const passwordHash = await bcrypt.hash(adminPassword, saltRounds);
+
+        const newAdmin = this.usersRepository.create({
+            username: adminUsername,
+            email: adminEmail,
+            passwordHash: passwordHash,
+            firstName: 'Super',
+            lastName: 'Admin',
+            active: true,
+            roles: [UserRole.ADMIN],
+            status: UserStatus.ACTIVE
+        });
+
+        await this.usersRepository.save(newAdmin);
+        console.log(`Admin user '${adminUsername}' seeded successfully.`);
+    } catch (error) {
+      console.error('Error seeding admin user:', error);
+    }
   }
 }
 

@@ -5,33 +5,34 @@ import { BaseEntity } from "src/common/entities/base.entity";
 
 @Entity('users')
 export class User extends BaseEntity {
-  @Column({ unique: true })
+  @Column({ unique: true, length: 50})
   username: string;
 
-  @Column({ unique: true })
+  @Column({ unique: true, length: 100 })
   email: string;
 
   @Column()
   @Exclude()
   passwordHash: string;
 
-  @Column()
-  firstName: string;
+  @Column({ nullable: true, length: 50 })
+  firstName?: string;
 
-  @Column()
-  lastName: string;
+  @Column({ nullable: true, length: 50 })
+  lastName?: string;
 
-  @Column({ type: 'date' })
-  dob: Date;
+  @Column({ type: 'date', nullable: true })
+  dob?: Date;
 
   @Column({
     type: 'enum',
     enum: Gender,
+    nullable: true,
   })
-  gender: Gender;
+  gender?: Gender;
 
-  @Column()
-  healthId: string;
+  @Column({ nullable: true, length: 50 })
+  healthId?: string;
 
   @Column({ default: true })
   active: boolean;
@@ -40,9 +41,9 @@ export class User extends BaseEntity {
     type: "enum",
     enum: UserRole,
     array: true,
-    default: [UserRole.USER],
+    default: [UserRole.PATIENT],
   })
-  roles: UserRole[]
+  roles: UserRole[];
 
   @Column({ type: 'enum', enum: UserStatus, default: UserStatus.ACTIVE })
   status: UserStatus;
