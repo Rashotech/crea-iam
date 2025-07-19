@@ -13,7 +13,8 @@ export class UsersController {
 
   @HttpCode(201)
   @Post()
-  async register(@Body() registerUserDto: RegisterUserDto) {
+  @Roles(UserRole.ADMIN, UserRole.DOCTOR, UserRole.NURSE)
+  async createUser(@Body() registerUserDto: RegisterUserDto) {
     const response = await this.usersService.createNewUser(registerUserDto);
     return new SuccessResponse(
       'User Created Successful',
@@ -23,7 +24,7 @@ export class UsersController {
 
   @HttpCode(200)
   @UseGuards(AccessTokenGuard)
-  @Roles(UserRole.ADMIN)
+  @Roles(UserRole.ADMIN, UserRole.DOCTOR, UserRole.NURSE)
   @Get()
   async getAllUsers(@Query() query: GetUsersDto) {
     const users = await this.usersService.getAllUsers(query);
@@ -31,7 +32,7 @@ export class UsersController {
   }
 
   @UseGuards(AccessTokenGuard)
-  @Roles(UserRole.ADMIN)
+  @Roles(UserRole.ADMIN, UserRole.DOCTOR, UserRole.NURSE)
   @Get(":id")
   async getUser(@Param("id") id: string) {
     const user = await this.usersService.getUser(id);
@@ -39,7 +40,7 @@ export class UsersController {
   }
 
   @UseGuards(AccessTokenGuard)
-  @Roles(UserRole.ADMIN)
+  @Roles(UserRole.ADMIN, UserRole.DOCTOR, UserRole.NURSE)
   @Patch(":id")
   async updateUserDetails(
     @Param("id") id: string,
