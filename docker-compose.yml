@@ -21,12 +21,15 @@ services:
     container_name: iam-app
     environment: 
       - PORT=${PORT} 
+      - DOCKER_HOST=unix:///var/run/docker.sock
+      - TESTCONTAINERS_HOST_OVERRIDE=host.docker.internal
     ports:
       - '3000:3000'
     depends_on:
       - iam-db
     volumes:
-      - .:/app                   
+      - .:/app      
+      - /var/run/docker.sock:/var/run/docker.sock             
     networks:
       - default
 

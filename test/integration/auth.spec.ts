@@ -40,11 +40,6 @@ describe('Authentication (Integration)', () => {
   };
 
   beforeAll(async () => {
-    // Set environment variables for admin seeding
-    // process.env.ADMIN_USERNAME = newAdminUser.username;
-    // process.env.ADMIN_EMAIL = newAdminUser.email;
-    // process.env.ADMIN_PASSWORD = newAdminUser.password;
-    
     // Start PostgreSQL container
     postgresContainer = await new PostgreSqlContainer("postgres:13.3-alpine")
       .start();
@@ -101,7 +96,7 @@ describe('Authentication (Integration)', () => {
       active: true,
       roles: [UserRole.ADMIN]
     });
-  }, 9000); // Increase timeout for container startup
+  }, 9000);
 
   afterAll(async () => {
     await app.close();
