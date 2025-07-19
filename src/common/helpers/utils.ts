@@ -35,7 +35,7 @@ export const createPaginatedResponse = <T>(
     data: T[],
     totalItems: number,
     paginationOptions: IPaginationResponse,
-  ): IPaginatedDataResponse<T> => {
+): IPaginatedDataResponse<T> => {
     const currentPage = paginationOptions.skip / paginationOptions.take + 1;
     const totalPages = Math.ceil(totalItems / paginationOptions.take);
     const itemCount = data.length;
@@ -50,4 +50,19 @@ export const createPaginatedResponse = <T>(
         currentPage,
       },
     };
+}
+
+export function applyNonNullValues<T extends Record<string, any>>(target: T, source: Partial<T>): T {
+  for (const key in source) {
+    if (source.hasOwnProperty(key)) {
+      const value = source[key];
+      if (value !== null && value !== undefined) {
+        if (target.hasOwnProperty(key)) {
+          target[key] = value;
+        }
+      }
+    }
   }
+
+  return target;
+}

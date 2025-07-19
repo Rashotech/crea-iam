@@ -1,12 +1,13 @@
-import { Injectable, Logger } from "@nestjs/common";
+import { ConflictException, Injectable, Logger, NotFoundException } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import * as bcrypt from 'bcrypt';
 import { User } from "./entities";
 import { ArrayContains, EntityManager, FindOptionsWhere, Repository } from "typeorm";
 import { RegisterUserDto } from "src/modules/auth/dto";
-import { createPaginatedResponse, generatePatientMRN, getDataPaginationData } from "src/common/helpers/utils";
+import { applyNonNullValues, createPaginatedResponse, excludeSensitiveUserData, generatePatientMRN, getDataPaginationData } from "src/common/helpers/utils";
 import { UserRole, UserStatus } from "./enums";
-import { GetUsersDto } from "./dto";
+import { EditUserDto, GetUsersDto } from "./dto";
+import { ExceptionHelper } from "src/common/helpers/error-handler";
 
 @Injectable()
 export class UsersService {
@@ -17,6 +18,24 @@ export class UsersService {
     private usersRepository: Repository<User>,
     private entityManager: EntityManager,
   ) {}
+
+
+  async createNewUser(registerUserDto: RegisterUserDto) {
+    try {
+        // Check if user exists
+      const existingUser = await this.findUser(registerUserDto);
+      
+      if (existingUser) {
+        throw new ConflictException('Username or email already exists');
+      }
+
+      const newUser = await this.createUser(registerUserDto);
+      return excludeSensitiveUserData(newUser);
+    } catch (error) {
+      this.logger.error(error);
+      ExceptionHelper.handleException(error);
+    }
+  }
 
   async createUser(registerUserDto: RegisterUserDto) {
     this.logger.log(`Creating user: ${registerUserDto.username}`);
@@ -164,6 +183,24 @@ export class UsersService {
         console.log(`Admin user '${adminUsername}' seeded successfully.`);
     } catch (error) {
       console.error('Error seeding admin user:', error);
+    }
+  }
+
+  async updateUserDetails(id: string, editUserDto: EditUserDto) {
+    try {
+      this.logger.log(`Updating user details for ID: ${id}`, editUserDto);
+    
+      const user = await this.usersRepository.findOne({ where: { id } });
+      if (!user) {
+        throw new NotFoundException('User not found');
+      }
+
+      const validatedData = applyNonNullValues(user, editUserDto);
+      await this.usersRepository.update(id, validatedData);
+      return excludeSensitiveUserData(validatedData);
+    } catch (error) {
+      this.logger.error(`Failed to update user details for ID: ${id}`, error);
+      ExceptionHelper.handleException(error);
     }
   }
 }
