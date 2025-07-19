@@ -4,7 +4,6 @@ import {
   IsNotEmpty,
   IsOptional,
   IsString,
-  IsUUID,
   Matches,
 } from 'class-validator';
 import { AppointmentType } from '../enums';
@@ -25,7 +24,7 @@ export class CreateAppointmentDto {
   @IsEnum(AppointmentType)
   type: AppointmentType;
 
-  @IsUUID()
+  @IsString()
   @IsNotEmpty()
   userId: string;
 
