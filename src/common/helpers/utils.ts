@@ -1,3 +1,6 @@
+import { ICurrentUser } from "src/modules/auth/interfaces";
+import { User } from "src/modules/users/entities";
+
 export function generatePatientMRN(): string {
   const prefix = "MRN";
   const timestamp = Date.now().toString();
@@ -8,4 +11,9 @@ export function generatePatientMRN(): string {
   const checksumChar = String.fromCharCode(65 + (sumOfDigits % 26)); 
 
   return `${prefix}${timestamp}${randomPart}${checksumChar}`.toUpperCase();
+}
+
+export function excludeSensitiveUserData(user: User | ICurrentUser): Omit<User, 'passwordHash' | 'refreshToken' | 'lastLoginAt'> {
+  const { passwordHash, refreshToken, lastLoginAt, ...userWithoutSensitiveData } = user;
+  return userWithoutSensitiveData;
 }

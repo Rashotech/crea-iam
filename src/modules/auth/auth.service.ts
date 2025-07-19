@@ -10,6 +10,7 @@ import { ExceptionHelper } from 'src/common/helpers/error-handler';
 import { UsersService } from '../users/users.service';
 import { LoginUserDto, RegisterUserDto } from './dto';
 import { ConfigService } from '@nestjs/config';
+import { excludeSensitiveUserData } from 'src/common/helpers/utils';
 
 @Injectable()
 export class AuthService {
@@ -31,8 +32,7 @@ export class AuthService {
       }
 
       const newUser = await this.usersService.createUser(registerUserDto);
-      const { passwordHash, refreshToken, lastLoginAt, ...userWithoutPassword } = newUser;
-      return userWithoutPassword;
+      return excludeSensitiveUserData(newUser);
     } catch (error) {
       this.logger.error(error);
       ExceptionHelper.handleException(error);
@@ -53,12 +53,10 @@ export class AuthService {
         throw new BadRequestException('Invalid username or password');
       }
 
-      const { passwordHash, refreshToken, lastLoginAt, ...userWithoutPassword } = existingUser;
-
       const tokens = await this.getTokens(existingUser.id.toString(), existingUser.email);
       await this.updateRefreshToken(existingUser.id.toString(), tokens.refreshToken);
 
-      return { user: userWithoutPassword, tokens };
+      return { user: excludeSensitiveUserData(existingUser), tokens };
      
     } catch (error) {
       this.logger.error(error);
