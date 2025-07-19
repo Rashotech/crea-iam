@@ -16,7 +16,7 @@ A RESTful Identity and Access Management (IAM) service built with NestJS, provid
 - **ORM**: TypeORM
 - **Authentication**: JWT (JSON Web Tokens)
 - **Testing**: Jest, Supertest, TestContainers
-- **Containerization**: Docker
+- **Containerization**: Docker and Docker Compose
 
 ## Getting Started
 
