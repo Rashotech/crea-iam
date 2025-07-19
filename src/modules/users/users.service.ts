@@ -9,6 +9,9 @@ import { UserRole, UserStatus } from "./enums";
 import { EditUserDto, GetUsersDto } from "./dto";
 import { ExceptionHelper } from "src/common/helpers/error-handler";
 
+import * as dotenv from 'dotenv';
+dotenv.config();
+
 @Injectable()
 export class UsersService {
   private readonly logger = new Logger(UsersService.name);
@@ -150,9 +153,14 @@ export class UsersService {
 
   async seedAdminUser() {
      try {
-        const adminUsername = process.env.ADMIN_USERNAME || 'superadmin';
-        const adminEmail = process.env.ADMIN_EMAIL || 'superadmin@example.com';
-        const adminPassword = process.env.ADMIN_PASSWORD || 'Password123';
+        const adminUsername = process.env.ADMIN_USERNAME;
+        const adminEmail = process.env.ADMIN_EMAIL;
+        const adminPassword = process.env.ADMIN_PASSWORD;
+
+        if (!adminUsername || !adminEmail || !adminPassword) {
+          console.log('Admin credentials are not set in environment variables');
+          return;
+        }
 
         console.log(`Checking for existing admin user with email: ${adminEmail}...`);
         const existingAdmin = await this.usersRepository.findOne({

@@ -7,11 +7,11 @@ import {
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
-import { ExceptionHelper } from '../../common/helpers/error-handler';
+import { ExceptionHelper } from 'src/common/helpers/error-handler';
 import { UsersService } from '../users/users.service';
 import { LoginUserDto, RegisterUserDto } from './dto';
 import { ConfigService } from '@nestjs/config';
-import { excludeSensitiveUserData } from '../../common/helpers/utils';
+import { excludeSensitiveUserData } from 'src/common/helpers/utils';
 
 @Injectable()
 export class AuthService {
@@ -109,7 +109,7 @@ export class AuthService {
 
 
   async logout(userId: string) {
-    this.usersService.updateUser(userId, { refreshToken: undefined });
+    this.usersService.updateUser(userId, { refreshToken: "null" });
   }
 
   async refreshTokens(userId: string, refreshToken: string) {

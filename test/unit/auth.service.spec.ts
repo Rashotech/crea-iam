@@ -195,7 +195,7 @@ describe('AuthService', () => {
       await authService.logout('123');
 
       expect(mockUsersService.updateUser).toHaveBeenCalledWith('123', {
-        refreshToken: undefined,
+        refreshToken: 'null',
       });
     });
   });
