@@ -29,20 +29,28 @@ A RESTful Identity and Access Management (IAM) service built with NestJS, provid
 ### Environment Setup
 
 1. Clone the repository
-2. Copy the sample environment file:
+    ```bash
+   git clone https://github.com/Rashotech/crea-iam
+   ```
+3. Copy the sample environment file:
    ```bash
    cp .env.sample .env
    ```
-3. Update the `.env` file with your configuration
+4. Update the `.env` file with your configuration
 
 ### Running with Docker
-
 ```bash
+# Download and install Docker Desktop
+https://www.docker.com/products/docker-desktop/
+
 # Start the application and database
-docker-compose up -d
+docker compose up -d
+
+# Run migrations
+docker compose exec iam-app npm run migration:run
 
 # To stop the application
-docker-compose down
+docker compose down
 ```
 
 ### Database Migrations
